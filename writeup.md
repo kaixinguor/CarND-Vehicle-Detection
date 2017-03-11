@@ -15,7 +15,17 @@ The goals / steps of this project are the following:
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: ./examples/car_not_car.png
+
+[image1_1]: ./output_images/ex_img.png
+[image1_2]: ./output_images/color_vehicle.png
+[image1_3]: ./output_images/color_nonvehicle.png
+[image1_4_1]: ./output_images/ft_color_spatial_vehicle.png
+[image1_4_2]: ./output_images/ft_color_spatial_nonvehicle.png
+[image1_5_1]: ./output_images/ft_color_hist_vehicle.png
+[image1_5_2]: ./output_images/ft_color_hist_nonvehicle.png
+
+
+
 [image2]: ./examples/HOG_example.jpg
 [image3]: ./examples/sliding_windows.jpg
 [image4]: ./examples/sliding_window.jpg
@@ -24,25 +34,59 @@ The goals / steps of this project are the following:
 [image7]: ./examples/output_bboxes.png
 [video1]: ./project_video.mp4
 
-## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
+
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
-
-You're reading it!
 
 ###Histogram of Oriented Gradients (HOG)
 
 ####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in lines # through # of the file called `ft_extract.py`).
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+I started by reading in all the `vehicle` and `non-vehicle` images.  Here is some examples of one of each of the `vehicle` and `non-vehicle` classes:
 
-![alt text][image1]
+![alt text][image1_1]
+
+I plot the three samples in different color space: RGB, HSV and LUV, to get a feel of the distribution of  color.
+
+The distribution of vehicle pixels in different color space looks like:
+
+![alt text][image1_2]
+
+And the distribution of non-vehicle pixels in different color space looks like:
+
+![alt text][image1_3]
+
+It seems that the vehicle and non-nonvehicle samples are more separated in Satuation channel and in UV-space.
+
+Then I choose these three colors and continue to explore spatial features and histogram features.
+The spatial features for vehicle samples like this
+
+
+![alt text][image1_4_1]
+
+The spatial features for non-vehicle samples like this
+
+![alt text][image1_4_2]
+
+The histogram features for vehicle samples like this
+
+![alt text][image1_5_1]
+
+The histogram features for non-vehicle samples like this
+![alt text][image1_5_2]
+
+
+These figures show that spatial color is not very robust to position variation (comparing different samples). And U and V channel values are centered so that they are not very informative for discriminating car versus non-cars.
+
+The conclusion is, satuation color histgram may be disriminative for car and non-car.
+
+----
+Next thing I explore is the parameter of HOG features. Since HOG is about the graident, I first convert the image into gray scale　using `cv2.cvtColor`.
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 

@@ -1,3 +1,5 @@
 will searching only bottom level of image cause problem, eg, when a huge truck is in front?
 
 HOG parameter vis feature
+
+is sklearn HOG signed or unsigned
