@@ -9,6 +9,7 @@ from skimage import img_as_ubyte
 
 # Define a function to return HOG features and visualization
 def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
+
     if vis == True:
         features, hog_image = hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
                                   cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=False,
@@ -19,6 +20,22 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, featu
                        cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=False,
                        visualise=False, feature_vector=feature_vec)
         return features
+
+
+def hog_plot(img):
+    # explore HOG features in different color space
+    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+    print("image shape: ", img.shape)
+    features, hog_image = hog(img, visualise=True, feature_vector=False)
+
+    print("hog image shape: ", hog_image.shape)
+    print("hog feature shape: ", features.shape)
+
+    f, (ax1,ax2) = plt.subplots(1,2,figsize=(9,9))
+    ax1.imshow(img,cmap='gray')
+    ax1.set_title("gray image",fontsize=20)
+    ax2.imshow(hog_image,cmap='gray')
+    ax2.set_title("hog feature",fontsize=20)
 
 
 def bin_spatial(img, size=(32, 32)):
@@ -116,38 +133,7 @@ def display_color(img):
     ax3.set_title("LUV space", fontsize=20)
 
 
-if __name__ == '__main__':
-
-    path_vehicle = 'data/vehicles/KITTI_extracted/'
-    path_nonvehicle= 'data/non-vehicles/Extras/'
-    # print(path_vehicle+"*.png")
-
-    file_vehicle = glob.glob(path_vehicle+"*.png")
-    file_nonvehicle = glob.glob(path_nonvehicle+"*.png")
-    print(file_vehicle)
-    print(file_nonvehicle)
-
-    # display image example (single)
-    num_ex = 3
-    ex_vehicle = []
-    ex_nonvehicle = []
-    for i in range(num_ex):
-        f, axarr = plt.subplots(1, 2, figsize=(24, 9))
-        im_vehicle = mpimg.imread(file_vehicle[i])
-        im_nonvehicle = mpimg.imread(file_nonvehicle[i])
-
-        ex_vehicle.append(im_vehicle)
-        ex_nonvehicle.append(im_nonvehicle)
-
-        axarr[0].imshow(im_vehicle)
-        axarr[0].set_title("Vehicle",fontsize=40)
-        axarr[1].imshow(im_nonvehicle)
-        axarr[1].set_title("Non-vehicle",fontsize=40)
-
-        plt.savefig('output_images/ex_img{:d}.png'.format(i))
-    vis1 = np.concatenate(ex_vehicle, axis=0)
-    vis2 = np.concatenate(ex_nonvehicle, axis=0)
-
+def explore_color(vis1,vis2,ex_vehicle,ex_nonvehicle,num_ex):
     # display image example (concatenated)
     f, axarr = plt.subplots(1, 2, figsize=(10, 9))
     axarr[0].imshow(vis1)
@@ -230,31 +216,62 @@ if __name__ == '__main__':
             print('Your function is returning None for at least one variable...')
     plt.savefig('output_images/ft_color_hist_nonvehicle.png')
 
+if __name__ == '__main__':
+
+    path_vehicle = 'data/vehicles/KITTI_extracted/'
+    path_nonvehicle= 'data/non-vehicles/Extras/'
+    # print(path_vehicle+"*.png")
+
+    file_vehicle = glob.glob(path_vehicle+"*.png")
+    file_nonvehicle = glob.glob(path_nonvehicle+"*.png")
+    print(file_vehicle)
+    print(file_nonvehicle)
+
+    # display image example (single)
+    num_ex = 3
+    ex_vehicle = []
+    ex_nonvehicle = []
+    for i in range(num_ex):
+
+        im_vehicle = mpimg.imread(file_vehicle[i])
+        im_nonvehicle = mpimg.imread(file_nonvehicle[i])
+
+        ex_vehicle.append(im_vehicle)
+        ex_nonvehicle.append(im_nonvehicle)
+
+        # f, axarr = plt.subplots(1, 2, figsize=(24, 9))
+        # axarr[0].imshow(im_vehicle)
+        # axarr[0].set_title("Vehicle",fontsize=40)
+        # axarr[1].imshow(im_nonvehicle)
+        # axarr[1].set_title("Non-vehicle",fontsize=40)
+        #
+        # plt.savefig('output_images/ex_img{:d}.png'.format(i))
+
+    vis1 = np.concatenate(ex_vehicle, axis=0)
+    vis2 = np.concatenate(ex_nonvehicle, axis=0)
+
+    # explore_color(vis1, vis2, ex_vehicle, ex_nonvehicle, num_ex)
 
 
-    # # default parameter
-    # orient = 9
-    # pix_per_cell = 8
-    # cell_per_block = 2
-    #
-    # # explore HOG features in different color space
-    # img = im_vehicle[:,:,0]
-    # print(img.shape)
-    # features, hog_image = hog(img, visualise=True, feature_vector=False)
-    # print(features.shape)
-    # print(hog_image.shape)
-    # f, (ax1,ax2) = plt.subplots(1,2,figsize=(24,9))
-    # ax1.imshow(img,cmap='gray')
-    # ax1.set_title("channel image",fontsize=40)
-    # ax2.imshow(hog_image,cmap='gray')
-    # ax2.set_title("hog feature",fontsize=40)
+
+    # default parameter
+    orient = 9
+    pix_per_cell = 8
+    cell_per_block = 2
+
+    # explore HOG features in different color space
+    # hog_plot(vis1)
+    # plt.savefig('output_images/ft_hog_vehicle.png')
     # plt.show()
+    # hog_plot(vis2)
+    # plt.savefig('output_images/ft_hog_nonvehicle.png')
+    # plt.show()
+
 
     # explore HOG features for different parameters
 
 
-    # gray = cv2.cvtColor(im_vehicle,cv2.COLOR_RGB2GRAY)
-    # features,hog_image = get_hog_features(gray,orient,pix_per_cell,cell_per_block,vis=True)
+    # features,hog_image = get_hog_features(vis1,orient,pix_per_cell,cell_per_block,vis=True)
     # print(features.shape)
     # print(hog_image.shape)
     # f, (ax1,ax2) = plt.subplots(1,2,figsize=(24,9))
@@ -264,20 +281,58 @@ if __name__ == '__main__':
     # ax2.set_title("hog feature",fontsize=40)
     # plt.show()
 
-    # gray = cv2.cvtColor(im_vehicle, cv2.COLOR_RGB2GRAY)
-    #
-    # orients = [6, 9, 12, 15, 18]
+
+    # orients = [6, 8, 9, 10, 12]
+    # pix_per_cell = 8
+    # cell_per_block = 2
     # f, axarr = plt.subplots(1, len(orients)+1, figsize=(24, 9))
-    # axarr[0].imshow(gray, cmap='gray')
-    # axarr[0].set_title("gray image", fontsize=20)
-    #
+    # axarr[0].imshow(vis1)
+    # axarr[0].set_title("original image", fontsize=20)
+    # channel_gray = cv2.cvtColor(vis1, cv2.COLOR_RGB2GRAY)
     # for i in range(len(orients)):
     #
     #     orient = orients[i]
-    #     features,hog_image = get_hog_features(gray,orient,pix_per_cell,cell_per_block,vis=True)
+    #     features,hog_image = get_hog_features(channel_gray,orient,pix_per_cell,cell_per_block,vis=True)
     #     axarr[i+1].imshow(hog_image, cmap='gray')
     #     axarr[i+1].set_title("orient:{0:d}".format(orient), fontsize=20)
     #     print(features.shape)
     #     print(hog_image)
+    # plt.savefig('output_images/ft_hog_orients.png')
+    # plt.show()
+
+
+    orient = 9
+    cell_per_block = 2
+    pix_per_cells = [4, 6, 8, 10, 12]
+    f, axarr = plt.subplots(1, len(pix_per_cells)+1, figsize=(24, 9))
+    axarr[0].imshow(vis1)
+    axarr[0].set_title("original image", fontsize=20)
+    channel_gray = cv2.cvtColor(vis1, cv2.COLOR_RGB2GRAY)
+    for i in range(len(pix_per_cells)):
+
+        pix_per_cell = pix_per_cells[i]
+        features,hog_image = get_hog_features(channel_gray,orient,pix_per_cell,cell_per_block,vis=True)
+        axarr[i+1].imshow(hog_image, cmap='gray')
+        axarr[i+1].set_title("pix_per_cell:{0:d}".format(pix_per_cell), fontsize=20)
+        print(features.shape)
+        print(hog_image)
+    plt.savefig('output_images/ft_hog_pix_per_cell.png')
+    plt.show()
+
+    # orient = 9
+    # cell_per_blocks = [1,2,3,4,5]
+    # pix_per_cell = 8
+    # f, axarr = plt.subplots(1, len(cell_per_blocks)+1, figsize=(24, 9))
+    # axarr[0].imshow(vis1)
+    # axarr[0].set_title("original image", fontsize=20)
+    # channel_gray = cv2.cvtColor(vis1, cv2.COLOR_RGB2GRAY)
+    # for i in range(len(cell_per_blocks)):
     #
+    #     cell_per_block = cell_per_blocks[i]
+    #     features,hog_image = get_hog_features(channel_gray,orient,pix_per_cell,cell_per_block,vis=True)
+    #     axarr[i+1].imshow(hog_image, cmap='gray')
+    #     axarr[i+1].set_title("cell_per_block:{0:d}".format(cell_per_block), fontsize=20)
+    #     print(features.shape)
+    #     print(hog_image.shape)
+    # plt.savefig('output_images/ft_hog_cell_per_block.png')
     # plt.show()

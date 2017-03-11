@@ -23,7 +23,10 @@ The goals / steps of this project are the following:
 [image1_4_2]: ./output_images/ft_color_spatial_nonvehicle.png
 [image1_5_1]: ./output_images/ft_color_hist_vehicle.png
 [image1_5_2]: ./output_images/ft_color_hist_nonvehicle.png
-
+[image1_6_1]: ./output_images/ft_hog_vehicle.png
+[image1_6_2]: ./output_images/ft_hog_nonvehicle.png
+[image1_7_1]: ./output_images/ft_hog_orients.png
+[image1_7_2]: ./output_images/ft_hog_pix_per_cell.png
 
 
 [image2]: ./examples/HOG_example.jpg
@@ -86,22 +89,42 @@ These figures show that spatial color is not very robust to position variation (
 The conclusion is, satuation color histgram may be disriminative for car and non-car.
 
 ----
+
 Next thing I explore is the parameter of HOG features. Since HOG is about the graident, I first convert the image into gray scale　using `cv2.cvtColor`.
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+HOG for vehicle
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+![alt text][image1_6_1]
 
+HOG for non-vehicle
 
-![alt text][image2]
+![alt text][image1_6_2]
+
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+I visualized HOG image of using different `orientations`:
+![alt text][image1_7_1]
+
+and different`pixels_per_cell`:
+
+![alt text][image1_7_2]
+
+Seems that `orientations` does not look sensitive and  `pixels_per_cell=(8, 8)` is a potential good choice.
+another parameter `cells_per_block=(2, 2)` is for normalization, I just use the value used in the lecture.
+
+Finally, I chose gray scale color space and set HOG parameters of `orientations=9`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`.
+
+Except for the performance, these parameters also affect feature length, thus cause different usage of memory and time computation.
+
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+I trained a linear SVM using HOG features. The code is in the file `./car_train.py`.
+
+I read `car` images and `notcar` images, extract HOG features from R,G,B channels respectively, and concatenate them together to get feature vectors.
+
+Then I split data into 80% training and 20% test by `sklearn.cross_validation.train_test_split()`. `sklearn.svm.LinearSVC` is used for training and test. 
 
 ###Sliding Window Search
 
