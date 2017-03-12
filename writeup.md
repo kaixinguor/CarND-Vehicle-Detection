@@ -16,6 +16,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
+
 [image1_1]: ./output_images/ex_img.png
 [image1_2]: ./output_images/color_vehicle.png
 [image1_3]: ./output_images/color_nonvehicle.png
@@ -27,6 +28,8 @@ The goals / steps of this project are the following:
 [image1_6_2]: ./output_images/ft_hog_nonvehicle.png
 [image1_7_1]: ./output_images/ft_hog_orients.png
 [image1_7_2]: ./output_images/ft_hog_pix_per_cell.png
+[image2_1]: ./output_images/detect_multiscale_window.png
+[image2_2]: ./output_images/detect_hot_window.png
 
 
 [image2]: ./examples/HOG_example.jpg
@@ -130,15 +133,16 @@ Then I split data into 80% training and 20% test by `sklearn.cross_validation.tr
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+I use a multi-scale sliding window search to be the candidate windows. The code is in the file `detect_car.py`
 
-![alt text][image3]
+
+![alt text][image2_1]
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+Ultimately I searched on three scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![alt text][image4]
+![alt text][image2_2]
 ---
 
 ### Video Implementation
