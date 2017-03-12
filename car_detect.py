@@ -182,6 +182,9 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
 
 
 def car_detect(img):
+    with open('output_images/car_clf.pkl', 'rb') as f:
+        [svc, X_scaler] = pickle.load(f)
+
     ### TODO: Tweak these parameters and see how the results change.
     color_space = 'RGB'  # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     orient = 9  # HOG orientations
