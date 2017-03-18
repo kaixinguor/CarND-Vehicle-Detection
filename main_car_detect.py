@@ -1,8 +1,10 @@
 import cv2
 import os
-from car_detect import car_detect
+from car_detect import car_detect, find_car
 from matplotlib import pyplot as plt
 import imageio
+import pickle
+import numpy as np
 
 def ensure_dir(d):
     if not os.path.exists(d):
@@ -17,22 +19,26 @@ if __name__ == '__main__':
     # vidcap = cv2.VideoCapture()
     vid = imageio.get_reader(video_file, 'ffmpeg')
     num_img = len(vid)
+
+    with open('output_images/car_clf.pkl', 'rb') as f:
+        [clf, X_scaler, config] = pickle.load(f)
+
+
+    box_list = []
     for i, img in enumerate(vid):
         print('Frame %i / %i' % (i+1, num_img))
 
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # out = cv2.VideoWriter("output_images/" + target + "_video_result.avi", fourcc, fps, (width, height))
+        img = img.astype(np.float32) / 255
+        # print(np.max(img))
 
-        # img = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
-        result = car_detect(img)
+        #hot_window_img = car_detect(img, [clf, X_scaler, config])
+        hot_windows, hot_window_img = find_car(img, [clf, X_scaler, config])
 
-        cv2.imwrite("output_images/" + target + "_video_result/{:04d}.jpg".format(i),result)
-        # out.write(result)
-        # count += 1
-    #
-    # print("width: ", width, ", height: ", height)
-    # print("frame: ", length)
-    # print("fps: ", fps)
-    # print("count:", count)
-    # vidcap.release()
-    # out.release()
+        # result = 255*cv2.cvtColor(hot_window_img, cv2.COLOR_RGB2BGR)
+        # result = result.astype(np.uint8)
+        # cv2.imwrite("output_images/" + target + "_video_result/{:04d}.png".format(i),result)
+
+        box_list.append(hot_windows)
+
+    with open('output_images/car_box.pkl', 'wb') as f:
+        pickle.dump(box_list, f)

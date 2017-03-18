@@ -8,6 +8,16 @@ import cv2
 from skimage import img_as_ubyte
 
 
+
+def convert_color(img, conv='RGB2YCrCb'):
+    if conv == 'RGB2YCrCb':
+        return cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+    if conv == 'BGR2YCrCb':
+        return cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    if conv == 'RGB2LUV':
+        return cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+
+
 def get_hog_features(img, orient, pix_per_cell, cell_per_block,
                         vis=False, feature_vec=True):
     # Call with two outputs if vis==True
@@ -98,6 +108,18 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32),
 
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
+def extract_features_from_image(image, cspace='RGB', spatial_size=(32, 32),
+                     hist_bins=32,
+                     orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                     spatial_feat=True, hist_feat=True, hog_feat=True):
+
+    img_features = single_img_features(image, cspace, spatial_size,
+                    hist_bins, orient,pix_per_cell, cell_per_block, hog_channel,
+                    spatial_feat, hist_feat, hog_feat)
+    # Return list of feature vectors
+    return img_features
+
+
 def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
                      hist_bins=32,
                      orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0,
@@ -106,7 +128,8 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
     features = []
     for file in imgs:
         # Read in each one by one
-        image = mpimg.imread(file)
+        image = mpimg.imread(file) # png image range [0,1]!!!
+        # print(np.max(image))
         img_features = single_img_features(image, cspace, spatial_size,
                         hist_bins, orient,pix_per_cell, cell_per_block, hog_channel,
                         spatial_feat, hist_feat, hog_feat)
@@ -303,6 +326,7 @@ def explore_color(vis1,vis2,ex_vehicle,ex_nonvehicle,num_ex):
             print('Your function is returning None for at least one variable...')
     plt.savefig('output_images/ft_color_hist_nonvehicle.png')
 
+
 if __name__ == '__main__':
 
     path_vehicle = 'data/vehicles/KITTI_extracted/'
@@ -401,8 +425,8 @@ if __name__ == '__main__':
         features,hog_image = get_hog_features(channel_gray,orient,pix_per_cell,cell_per_block,vis=True)
         axarr[i+1].imshow(hog_image, cmap='gray')
         axarr[i+1].set_title("pix_per_cell:{0:d}".format(pix_per_cell), fontsize=20)
-        print(features.shape)
-        print(hog_image)
+        # print(features.shape)
+        # print(hog_image)
     plt.savefig('output_images/ft_hog_pix_per_cell.png')
     plt.show()
 
