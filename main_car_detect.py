@@ -12,8 +12,9 @@ def ensure_dir(d):
 
 if __name__ == '__main__':
     target = "project"
-    output_dir = "output_images/" + target + "_video_result"
-    ensure_dir(output_dir)
+
+    # output_dir = "output_images/" + target + "_video_result"
+    # ensure_dir(output_dir)
 
     video_file = target + '_video.mp4'
     # vidcap = cv2.VideoCapture()

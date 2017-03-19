@@ -51,6 +51,8 @@ if __name__ == '__main__':
 
     output_dir_det = "output_images/" + target + "_video_result_det/"
     ensure_dir(output_dir_det)
+    output_dir_detnms = "output_images/" + target + "_video_result_detnms/"
+    ensure_dir(output_dir_detnms)
     output_dir_trac = "output_images/" + target + "_video_result_trac/"
     ensure_dir(output_dir_trac)
 
@@ -74,16 +76,32 @@ if __name__ == '__main__':
 
 
         # visualize detection
-        # hot_window_img = draw_boxes(img, hot_windows, color=(0, 0, 255), thick=6)
-        # result = cv2.cvtColor(hot_window_img, cv2.COLOR_RGB2BGR)
-        # cv2.imwrite(output_dir_det + "{:04d}.png".format(i),result)
+        hot_window_img = draw_boxes(img, hot_windows, color=(0, 0, 255), thick=6)
+        result = cv2.cvtColor(hot_window_img, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(output_dir_det + "{:04d}.png".format(i),result)
 
-        # plt.imshow(hot_window_img)
-        # plt.show()
+        #single heat
+        heat1 = np.zeros_like(img[:, :, 0]).astype(np.float)
+        heat1 = add_heat(heat1, hot_windows)
+        heat1 = apply_threshold(heat1, 0)
+        heatmap1 = np.clip(heat1, 0, 255)
+        fig = plt.figure()
+        plt.subplot(121)
+        plt.imshow(hot_window_img)
+        plt.title('frame ' + str(idx) + ' detection')
+        plt.subplot(122)
+        plt.imshow(heatmap1, cmap='hot')
+        plt.title('frame ' + str(idx) + ' heatmap')
+        fig.tight_layout()
+        plt.savefig(output_dir_detnms + "{:04d}.png".format(i))
+        fig.clf()
 
+
+        # integrade
         # for tracking
-        hot_windows = sum(box_list[idx:idx+20],[])
+        hot_windows = sum(box_list[idx-20:idx+1],[])
         # print(hot_windows)
+        hot_window_img = draw_boxes(img, hot_windows, color=(0, 0, 255), thick=6)
 
         heat = np.zeros_like(img[:, :, 0]).astype(np.float)
 
@@ -91,7 +109,7 @@ if __name__ == '__main__':
         heat = add_heat(heat, hot_windows)
 
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat, 5)
+        heat = apply_threshold(heat, 4)
 
         # Visualize the heatmap when displaying
         heatmap = np.clip(heat, 0, 255)
@@ -102,16 +120,19 @@ if __name__ == '__main__':
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
         writer.append_data(draw_img)
 
-        # fig = plt.figure()
-        # plt.subplot(121)
-        # plt.imshow(draw_img)
-        # plt.title('Car Positions')
-        # plt.subplot(122)
-        # plt.imshow(heatmap, cmap='hot')
-        # plt.title('Heat Map')
-        # fig.tight_layout()
-        # plt.savefig(output_dir_trac + "{:04d}.png".format(i))
-        # # plt.show()
-        # plt.close()
+        fig = plt.figure()
+        plt.subplot(121)
+        plt.imshow(heatmap, cmap='hot')
+        plt.title('frame ' + str(idx) + ' accumulated heatmap')
+        plt.subplot(122)
+        plt.imshow(draw_img)
+        plt.title('frame ' + str(idx) + ' result')
+        fig.tight_layout()
+        plt.savefig(output_dir_trac + "{:04d}.png".format(i))
+        # plt.show()
+        fig.clf()
+
+        # result = cv2.cvtColor(draw_img, cv2.COLOR_RGB2BGR)
+        # cv2.imwrite(output_dir_trac + "{:04d}.png".format(i),result)
 
     writer.close()

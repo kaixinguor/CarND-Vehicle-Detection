@@ -138,6 +138,8 @@ if __name__ == '__main__':
     print(round(time.time()-t, 2), 'Seconds to extract HOG features...')
 
     t = time.time()
+    print(len(car_features))
+    print(len(notcar_features))
     X_scaler, X_train, X_test, y_train, y_test = normalize_data(car_features,notcar_features)
     print(round(time.time() - t, 2), 'Seconds to normalize features...')
 

@@ -28,10 +28,10 @@ def car_detect(img,classifier):
 
     hot_windows = search_windows(img, ms_windows,classifier)
 
-    # window_img = draw_boxes(img, ms_windows, color=(0, 0, 1), thick=6)
-    # plt.imshow(window_img)
-    # plt.savefig('output_images/detect_multiscale_window.png')
-    # plt.show()
+    window_img = draw_boxes(img, ms_windows, color=(0, 0, 1), thick=6)
+    plt.imshow(window_img)
+    plt.savefig('output_images/detect_multiscale_window.png')
+    plt.show()
 
     hot_window_img = draw_boxes(img, hot_windows, color=(0, 0, 1), thick=6)
     return hot_window_img
@@ -149,18 +149,7 @@ def find_car(img, classifier):
 
     img_tosearch = img[ystart:ystop, :, :]
 
-    if colorspace != 'RGB':
-        if colorspace == 'HSV':
-            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2HSV)
-        elif colorspace == 'LUV':
-            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2LUV)
-        elif colorspace == 'HLS':
-            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2HLS)
-        elif colorspace == 'YUV':
-            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2YUV)
-        elif colorspace == 'YCrCb':
-            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2YCrCb)
-    else: ctrans_tosearch = np.copy(img)
+    ctrans_tosearch = convert_color(img_tosearch, color_space=colorspace)
 
     if scale != 1:
         imshape = ctrans_tosearch.shape
@@ -210,7 +199,7 @@ def find_car(img, classifier):
                 img_features.append(spatial_features)
 
             if hist_feat == True:
-                hist_features = color_hist(subimg, nbins=hist_bins)
+                hist_features,_,_ = color_hist(subimg, nbins=hist_bins,color_space=colorspace)
                 img_features.append(hist_features)
 
             # Extract HOG for this patch
