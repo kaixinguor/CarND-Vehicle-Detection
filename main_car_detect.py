@@ -1,6 +1,6 @@
 import cv2
 import os
-from car_detect import car_detect, find_car, find_car2
+from car_detect import car_detect, find_car_multiscale
 from matplotlib import pyplot as plt
 import imageio
 import pickle
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         # print(np.max(img))
 
         #hot_window_img = car_detect(img, [clf, X_scaler, config])
-        hot_windows, hot_window_img = find_car2(img, [clf, X_scaler, config])
+        hot_windows, hot_window_img = find_car_multiscale(img, [clf, X_scaler, config])
 
         # result = 255*cv2.cvtColor(hot_window_img, cv2.COLOR_RGB2BGR)
         # result = result.astype(np.uint8)

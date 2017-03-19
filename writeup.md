@@ -27,6 +27,7 @@ The goals / steps of this project are the following:
 [image2_1]: ./output_images/detect_multiscale_window.png
 [image2_2]: ./output_images/detect_hot_window1.png
 [image2_3]: ./output_images/detect_hot_window2.png
+[image2_4]: ./output_images/detect_hot_window3.png
 
 [image3_0]: ./output_images/detect_single_frame/0970.png
 [image3_1]: ./output_images/detect_single_frame/0971.png
@@ -50,6 +51,11 @@ The goals / steps of this project are the following:
 
 ---
 ###Writeup / README
+
+I started by reading in all the `vehicle` and `non-vehicle` images.  Here is some examples of `vehicle` and `non-vehicle` classes:
+
+![alt text][image1_1]
+
 
 ###Histogram of Oriented Gradients (HOG)
 
@@ -148,14 +154,16 @@ The output of detection on the test image looks like this:
 
 The result looks good, because bounding boxes are surrounding the cars instead of the background. 
 
-But the computation is quite slow: it takes around 1.5 seconds to process one image.
+But the computation is quite slow: it takes around 1.5 seconds to process one image with `50%` overlap, close to 6 seconds to process one image with  `75%` overlap,
 
 Since computing the HOG feature could be one bottleneck for the computation, I tried another searching method provided by the lecture: the idea is to compute HOG image on the whole image only once, and then the hog features for each searching window are computed directly from HOG image. The result of using this method in a single scale looks like this.
 
 ![alt text][image2_3]
 
-The result has slightly changed since the scale is different. But the result is still good enough at this stage and it only costs 0.5 seconds to process one image
+A multi-scale search can be done using this techniques and save a lot of time. For example, the same multiscale setting with the first method cost only 1 second (compared to 6 seconds).
 
+![alt text][image2_4]
+The results of these two methods are very similar but not exactly the same due to the different downsampling strategy.
 
 ---
 
@@ -216,18 +224,13 @@ In the experiments, avoid computing HOG features for every candidate window save
 Detection rate would be very important for the application.
 
 
-### Plus
+### Appendix
 
 ### Color information
 
-####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+####1. Here is some exploration about color features from the training images.
 
 The code about feature extraction is in the file `./ft_extract.py`.
-
-
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is some examples of `vehicle` and `non-vehicle` classes:
-
-![alt text][image1_1]
 
 I plot these samples in different color space: `RGB`, `HSV`, `LUV`, `HLS`, `YUV`, `YCrCb` to get a feel of the distribution of  color.
 
