@@ -120,10 +120,7 @@ def train_clf(X_train, X_test, y_train, y_test):
 
 if __name__ == '__main__':
 
-    t = time.time()
-    cars, notcars = get_image_list(500)
-    print(round(time.time() - t, 2), 'Seconds to load data ...')
-
+    #configure parameters
     config = {'colorspace':'YCrCb','spatial_size':(32, 32),'hist_bins':32,
               'orient':9,'pix_per_cell':8,'cell_per_block': 2,
               'hog_channel':'ALL','spatial_feat':True,'hist_feat':True,'hog_feat':True}
@@ -132,20 +129,30 @@ if __name__ == '__main__':
           config['orient'],'orientations,',config['pix_per_cell'],
         'pixels per cell and', config['cell_per_block'],'cells per block')
 
-    t = time.time()
-    car_features = get_features(cars,config)
-    notcar_features = get_features(notcars, config)
-    print(round(time.time()-t, 2), 'Seconds to extract HOG features...')
 
+    # read a subset of data
+    t = time.time()
+    cars, notcars = get_image_list(500)
+    print(round(time.time() - t, 2), 'Seconds to load data ...')
+
+    # compute features
+    t = time.time()
+    car_features = get_features(cars, config)
+    notcar_features = get_features(notcars, config)
+    print(round(time.time() - t, 2), 'Seconds to extract HOG features...')
+
+    # normalize data
     t = time.time()
     print(len(car_features))
     print(len(notcar_features))
     X_scaler, X_train, X_test, y_train, y_test = normalize_data(car_features,notcar_features)
     print(round(time.time() - t, 2), 'Seconds to normalize features...')
 
+    # train classifier
     t = time.time()
     clf = train_clf(X_train, X_test, y_train, y_test)
     print(round(time.time() - t, 2), 'Seconds to train and test...')
 
+    # save trained classifier and parameter configuration
     with open('output_images/car_clf.pkl', 'wb') as f:
         pickle.dump([clf,X_scaler,config], f)

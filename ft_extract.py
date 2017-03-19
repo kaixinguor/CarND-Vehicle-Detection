@@ -315,53 +315,7 @@ def explore_hog(vis1,vis2):
         plt.savefig('output_images/hog_' + color + '_notcar.png')
 
 
-if __name__ == '__main__':
-
-
-    path_vehicle = 'data/vehicles/KITTI_extracted/'
-    path_nonvehicle= 'data/non-vehicles/Extras/'
-
-
-    file_vehicle = glob.glob(path_vehicle+"*.png")
-    file_nonvehicle = glob.glob(path_nonvehicle+"*.png")
-
-
-    # display image example (single)
-    num_ex = 3
-    example_vehicle = []
-    example_nonvehicle = []
-    for i in range(num_ex):
-
-        im_vehicle = mpimg.imread(file_vehicle[i])
-        print(np.max(im_vehicle))
-        im_nonvehicle = mpimg.imread(file_nonvehicle[i])
-
-        example_vehicle.append(im_vehicle)
-        example_nonvehicle.append(im_nonvehicle)
-
-        f, axarr = plt.subplots(1, 2, figsize=(24, 9))
-        axarr[0].imshow(im_vehicle)
-        axarr[0].set_title("Vehicle",fontsize=40)
-        axarr[1].imshow(im_nonvehicle)
-        axarr[1].set_title("Non-vehicle",fontsize=40)
-
-        plt.savefig('output_images/example_img{:d}.png'.format(i))
-
-    vis1 = np.concatenate(example_vehicle, axis=0)
-    vis2 = np.concatenate(example_nonvehicle, axis=0)
-
-
-    # # explore color space
-    explore_color(vis1, vis2, example_vehicle, example_nonvehicle, num_ex)
-
-    exit(0)
-
-
-    # # explore HOG features in different color space
-    explore_hog(vis1,vis2)
-
-
-    # explore HOG features for different parameters
+   # explore HOG features for different parameters
     orients = [6, 8, 9, 10, 12]
     pix_per_cell = 8
     cell_per_block = 2
@@ -410,3 +364,66 @@ if __name__ == '__main__':
         print(features.shape)
         print(hog_image.shape)
     plt.savefig('output_images/hog_para_cell_per_block.png')
+
+
+if __name__ == '__main__':
+
+
+    path_vehicle = 'data/vehicles/KITTI_extracted/'
+    path_nonvehicle= 'data/non-vehicles/Extras/'
+
+
+    file_vehicle = glob.glob(path_vehicle+"*.png")
+    file_nonvehicle = glob.glob(path_nonvehicle+"*.png")
+
+
+    # display image example (single)
+    num_ex = 3
+    example_vehicle = []
+    example_nonvehicle = []
+    for i in range(num_ex):
+
+        im_vehicle = mpimg.imread(file_vehicle[i])
+        print(np.max(im_vehicle))
+        im_nonvehicle = mpimg.imread(file_nonvehicle[i])
+        print(im_nonvehicle.shape)
+
+        example_vehicle.append(im_vehicle)
+        example_nonvehicle.append(im_nonvehicle)
+
+        f, axarr = plt.subplots(1, 2, figsize=(24, 9))
+        axarr[0].imshow(im_vehicle)
+        axarr[0].set_title("Vehicle",fontsize=40)
+        axarr[1].imshow(im_nonvehicle)
+        axarr[1].set_title("Non-vehicle",fontsize=40)
+
+        plt.savefig('output_images/example_img{:d}.png'.format(i))
+
+    vis1 = np.concatenate(example_vehicle, axis=0)
+    vis2 = np.concatenate(example_nonvehicle, axis=0)
+
+
+    # # # explore color space
+    # explore_color(vis1, vis2, example_vehicle, example_nonvehicle, num_ex)
+    #
+    #
+    # # # explore HOG features in different color space
+    # explore_hog(vis1,vis2)
+
+    # # HOG with chosen parameters
+    orient = 9
+    cell_per_block = 2
+    pix_per_cell = 8
+    f, axarr = plt.subplots(1,2, figsize=(24, 9))
+    axarr[0].imshow(example_vehicle[0])
+    axarr[0].set_title("original image", fontsize=20)
+    channel_gray = cv2.cvtColor(example_vehicle[0], cv2.COLOR_RGB2GRAY)
+
+    features,hog_image = get_hog_features(channel_gray,orient,pix_per_cell,cell_per_block,vis=True,feature_vec=True)
+    axarr[1].imshow(hog_image, cmap='gray')
+    axarr[1].set_title("hog".format(cell_per_block), fontsize=20)
+    print(features.shape)
+    print(hog_image.shape)
+    plt.savefig('output_images/hog.png')
+
+
