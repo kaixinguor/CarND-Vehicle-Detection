@@ -92,7 +92,7 @@ I visualize HOG images of different `orientations`:
 
 Small value of this parameter (e.g. `orientations=6 or 8`) does not contain enough bins to capture specific orientation information of car gradients (e.g., horizontal gradients go to bins in which gradients with obvious angle are dominant).
 
-When `orientations>=9`, the gradient looks reasonable. But when the value goes bigger, the feature may however become sensitive to in-plain rotation (e.g. when the camera is not exactly horizontal) . So I set `orientations=9` to keep enough information of gradient orientation while more invariant to slight rotation.
+When `orientations>=9`, the gradient binning looks reasonable. But when the value goes bigger, the feature may however become sensitive to in-plane rotation (e.g. when the camera is not exactly horizontal) . So I set `orientations=9` to keep enough information of gradient orientation while letting features be more invariant to slight rotation.
 
 The HOG images with different`pixels_per_cell` look like this:
 
@@ -109,7 +109,7 @@ This parameter will influence normalization. I choose `cell_per_block=2` so that
 In conclusion, the parameters for HOG features are selected as follows:
 `orientations=9`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`.
 The idea is to provide as much information as possible while being robust.
-Applying on a `64*64` image, this setting will give `8*8` cells, every cell gives `9` dimention feature vector, and every neighboring `2*2` cells are normalized. So the final featue vector has `7*7*2*2*9 = 1764` dimension vector.
+Applying on a `64*64` image, this setting will give `8*8` cells, every cell gives `9` dimention feature vector, and every neighboring `2*2` cells are normalized. So the final featue vector's dimension is`7*7*2*2*9 = 1764`.
 
 
 
@@ -117,9 +117,9 @@ Applying on a `64*64` image, this setting will give `8*8` cells, every cell give
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
 
-I trained a linear SVM using HOG features combined with color spatial feature and color histogram feature (the analysis of color feature is at the end of this document).
+I trained a linear SVM using HOG features combined with color spatial feature and color histogram feature (the analysis of color features is at the end of this document).
 
-The code is in the file `./car_train.py`. The code for training pipeline is in lines 123 through 158. 
+The code is in the file `./car_train.py`. The code of the training pipeline is in lines 123 through 158. 
 
 I first set parameters for extracting features. 
 
@@ -129,9 +129,9 @@ Then I extract features from all channels of YCrCb color space, and concatenate 
 
 The data are splitted into 80% training and 20% test by `sklearn.model_selection.train_test_split()`.
 
-The data are normalized in the function `normalize_data()`. 
+The data are normalized in the function `normalize_data()` in lines 76 through 95 in `./car_train.py`. 
 
- `sklearn.svm.LinearSVC` is used for training and test.
+ `sklearn.svm.LinearSVC` is used for training and test (in lines 98 through 118 in function `train_clf()` ).
 
  The total feature length is 8460 (Each channel contains `1764` HOG features, `32*32=1024` color spatial features and `32` color histogram features. So three channels contain in total `(1764+1024+32)*3=8460`). Test accuracy is 98%.
 
@@ -148,19 +148,18 @@ The code for this part is in the file `./car_detect.py`.
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
 
-The sliding window search is implemented in the function `slide_window()` in the file `./car_detect.py` in lines 39 through 79. The search process will generate a list of box by moving a window (the size of the window is set in the parameter `xy_window`) from left to right, from top to bottom. The step of moving is specified by the parameter `xy_overlap`. An overlap of `0.5` means `50%` overlapping; `0.25` means `75%` overlapping between neighboring windows.
+The sliding window search is implemented in the function `slide_window()` in`./car_detect.py` in lines 39 through 79. The search process will generate a list of boxes by moving a window (the size of the window is set in the parameter `xy_window`) from left to right, from top to bottom. The step of moving is specified by the parameter `xy_overlap`. An overlap ratio of `0.5` means `50%` overlapping.
  
 This function can limit searching within a part of the image depending on the parameters of `x_start_stop` and `y_start_stop`. 
 
-In the experiment the overlapping is set to `75%`.
+In the experiment moving step is set to `25%` of the window size, i.e., neighboring windows overlaps `75%` in `x` or `y` direction.
 
 
-
-In order to capture cars with different sizes, I use a multi-scale sliding window search to find candidate windows. The code is in lines 11 through 33 in the function `car_detect()` in the file `./car_detect.py`. 
+In order to capture cars with different sizes, I use a multi-scale sliding window search to find candidate windows. The code is in lines 11 through 33 in the function `car_detect()` in `./car_detect.py`. 
 
 I use four kinds of window size `[80,96,112,128]` by trial and test. I plot different sizes of box in the test images and compare them with different sizes of cars.
 
-In order to reduce the computation of sliding window and reject potentially false positives, I limit the search area in the parameter `y_start_stops`. The idea is that the cars appeared in the middle of the image tend to be smaller than those appeared in the bottom of the image. So we the effective searching area needs to be adaptive to the window size. 
+In order to reduce the computation of sliding window and reject potential false positives, I limit the search area in the parameter `y_start_stops`. The idea is that the cars appeared in the middle of the image tend to be smaller than those appeared in the bottom of the image. So the effective searching area can be adaptive to the window size. 
 
 
 The multi-scale windows I used look like this:
@@ -177,31 +176,32 @@ The result looks good, because most of the time the bounding boxes are surroundi
 
 But there are several problems:
 
-** There are multiple boxes on the same car **
+* There are multiple boxes on the same car 
 
-** There are sometimes false positives on the background **
+* There are sometimes false positives on the background 
 
-** The computation is very slow: close to 6 seconds to process one image with  `75%` overlap **
+* The computation is very slow: about 6 seconds to process one image with  `75%` overlap 
 
-The first two problem will be handled in the next section when we process a video. In the following I discuss about the computation.
+The first two problems will be discussed in the next section where we process a video. In the following I discuss about the computation.
 
-It will takes around 1.5 seconds to process one image with `50%` overlap, but when the candidate windows become sparse, the performance of detection may drop, i.e. car is more likely missed if the box is not align well with the car.
-So reducing the number of searching windows may not be a good idea.
+One possibility is to reduce the searching density. For example,  it will takes around 1.5 seconds to process one image with `50%` overlap, but when the candidate windows become sparse, the performance of detection may drop, i.e. car is more likely missed if the box is not aligned well with the car.
+So simply reducing the number of searching windows may not be a good idea.
 
-Since computing the HOG feature could be one bottleneck for the computation, I tried another searching method provided by the lecture: the idea is to compute HOG image on the whole image only once, and then the hog features for each searching window are computed directly from HOG image. 
+Since computing HOG features could be one bottleneck for the computation, I tried another searching method provided in the lecture: the idea is to compute HOG image on the whole image only once, and then the hog features for each searching window are computed directly from HOG image. 
 
-The code is in the function `find_car()` in lines 127 through 227 in `./car_detect.py`.
+The code is in the function `find_car()` in lines 126 through 227 in `./car_detect.py`.
 
 The result of using this method in a single scale (equivalent with using window size `96`) looks like this.
 
 ![alt text][image2_3]
 
 
-A multi-scale search can be done using this techniques and save a lot of time. 
-I implement this part in `find_car_multiscale()` in lines 230 through 243 in `./car_detect.py`. With the same setting of `car_detect()` which computesHOG for every individual searching window. This fucntion cost only 1 second (compared to 6 seconds) to process one image. The results look like this
+A multi-scale search can be done using this technique in order to reduce feature computation time. 
+I implemented this part in `find_car_multiscale()` in lines 230 through 243 in `./car_detect.py`. With the same setting of `car_detect()` which computes HOG for every individual searching window, this fucntion costs only 1 second (v.s. 6 seconds) to process one image. The result looks like this:
 
 ![alt text][image2_4]
-The results of these two methods are very similar but not exactly the same due to the different downsampling strategy.
+
+The results of these two methods are very similar but not exactly the same due to the difference in the downsampling strategy.
 
 ---
 
@@ -213,14 +213,15 @@ Here's a [link to my video result](./output_images/project_video_result.mp4)
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-The pipeline which processes each frame of the video and gets detections on each frame is implemented in `./main_car_detect.py`. 
+The pipeline which processes each frame of the video and gets detections on each frame is implemented in `./main_car_detect.py` in lines 13 through 45. It reads every frame from the video and applies `find_car_multiscale()` in `./car_detect.py`.
  
-I recorded the positions of positive detections in each frame of the video, and save it in the file `./output_images/car_box.pkl` for later use.
+ Then the position of positive detections in each frame is saved in the file `./output_images/car_box.pkl` for later use.
 
-From the example detection result shown in previous section, we can see duplicate detections and false positives. Apparently duplicate detections appear much more frequent than false positives in consecutive frames.
+From the example detection results shown in the previous section, we could see duplicate detections and false positives. One observation is that duplicate detections appear much more frequent than false positives in consecutive frames.
 
 So I compute a heatmap for every frame (see function `add_heat()` in lines 15 through 23 in `./main_car_tracking.py`).
-The result of this shows that how many times that every pixel is identified as car inside one bounding box.
+
+Very pixel in a heatmap calculates how many times that pixel is identified as car by one box.
 
 ### Here are five frames and their corresponding heatmaps:
 
@@ -249,23 +250,25 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
 
 
 * Color space 
-The color space I chose is somewhat intuitive. It deserves to explore more deeply in the future which color is really better for the car-detection and whether combine from different color spaces will help.
+
+The color space I chose is somewhat intuitive. It deserves to explore more deeply in the future about which color is  better for the car-detection and whether combining different color spaces will help.
  
 * Dataset choice
 
-In the beginning I use only KITTI dataset and found the detector get quite high test accuracy while the result on test image is bad. After I add GTI dataset, the result looks better. Then I looked into the image and found that KITTI dataset is more different from the test image compared to GTI dataset. So training with similar images (information distribution) is important especially when the dataset is not large.
+In the beginning I used only KITTI dataset and found the detector got quite high test accuracy while the result on test image was bad. After I added GTI dataset, the result looked better. Then I looked into the image and found that KITTI dataset is more different from the test image compared to GTI dataset. So training with similar images (information distribution) is important especially when the dataset is not large.
 
 * png and jpg scale
 
-One nees to be careful about the range of the image. opencv function `cv2.cvtColor()` may have different behaviors on different types of image.
+One nees to be careful about the range of the image. opencv function. `cv2.cvtColor()` may have different behaviors on different types of image.
  
 
 * Sliding window speed
-In the experiments, avoid computing HOG features for every candidate window saved more than 80% time. The similar thing could be done for other features. Besides, one of the state-of-the-arts detector ACF (P. Dollar, R. Appel, S. Belongie and P. Perona, "Fast Feature Pyramids for Object Detection," PAMI 2014.) involves the simiar idea to approximate HOG features in different scales instead of compute them from images in order to achieve 30fps detection rate. Detection rate would be very important for the later tracking process too.
 
-* By looking at the project video result, two typical failure cases could be found:
+In the experiments, avoiding computing HOG features for every candidate window saved more than 80% time. The similar thing could be done for other features. Besides, one of the state-of-the-art detectors ACF (P. Dollar, R. Appel, S. Belongie and P. Perona, "Fast Feature Pyramids for Object Detection," PAMI 2014.) involves a simiar idea that it approximates HOG features in different scales instead of computing them from images in order to achieve 30fps detection rate. Detection rate would be very important for the later tracking process too.
 
-One is accasionally false positives due to consistent false detection over time. As the parameter of filters are heuristic.
+* By looking at the project video result, two typical failure cases could be spotted:
+
+One is false detection due to consistent false positives over time. One reason for this un-robustness is that the parameters for filters are heuristically selected.
 
 Another cass is when two cars are very close or even occluded, this technology will group two cars together into one large bounding box. Constraints on the final bounding box size could be helpful to get more refined results. 
 
@@ -276,7 +279,7 @@ Another cass is when two cars are very close or even occluded, this technology w
 
 ####1. Here is some exploration about color features from the training images.
 
-The code about feature extraction is in the file `./ft_extract.py`.
+The code about color feature extraction is in the file `./ft_extract.py`.
 
 I plot data samples in different color space: `RGB`, `HSV`, `LUV`, `HLS`, `YUV`, `YCrCb` to get a feel of the distribution of  color.
 
@@ -288,33 +291,34 @@ And the distribution of non-vehicle pixels in different color spaces looks like:
 
 ![alt text][image1_3]
 
-It seems that non-vehicle images are more homogeneously distributed, as shown in the sample images.
+It seems that non-vehicle images are more compactly, as shown in the sample images.
 
 It's not clear which color space is better, so I continue to explore spatial features and histogram features.
 
 The code to compute color spatial features is in the function `bin_spatial()` in lines 57 through 63 in `./ft_extract.py`.
 The code to compute color histogram features is in the function `color_hist()` in lines 66 through 80 in `./ft_extract.py`.
 
-I use the default parameter settings in the lecture to set color spatial feature and color histogram features.
+I use the default parameter settings given in the lecture to set color spatial feature and color histogram features.
+
 With binning technology, the color information is less sensitive to  position variation (by comparing different samples). 
 
 
 In the following, I use YCrCb color space as an example.
 
-The spatial features for vehicle samples like this
+The spatial features for vehicle samples look like this
 
 
 ![alt text][image1_4_1]
 
-The spatial features for non-vehicle samples like this
+The spatial features for non-vehicle samples are like this
 
 ![alt text][image1_4_2]
 
-The histogram features for vehicle samples like this
+The histogram features for vehicle samples look like this
 
 ![alt text][image1_5_1]
 
-The histogram features for non-vehicle samples like this
+The histogram features for non-vehicle samples look like this
 ![alt text][image1_5_2]
 
 The above figures show some patterns which are different between car and non-car classes while similar for the samples in the same class. A hint is that colors provide some useful information. However more investigation is needed.
