@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
         # Find final boxes from heatmap using label function
         labels = label(heatmap)
+
         # print("labels", labels)
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
         writer.append_data(draw_img)
