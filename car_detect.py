@@ -247,24 +247,24 @@ if __name__ == '__main__':
     with open('output_images/car_clf.pkl', 'rb') as f:
         [clf, X_scaler,config] = pickle.load(f)
 
-    # f, axarr = plt.subplots(2,3, figsize=(24, 9))
-    # for itest in range(6):
-    #     img = mpimg.imread('test_images/test' + str(itest + 1) + '.jpg')
-    #     img = img.astype(np.float32) / 255
-    #     print(img.shape)
-    #     print(np.max(img))
-    #
-    #     t = time.time()
-    #     hot_windows0, hot_window_img = car_detect(img, [clf, X_scaler, config])
-    #     print(round(time.time() - t, 2), 'Seconds to detect car ...')
-    #     row = int(itest/3)
-    #     col = np.mod(itest,3)
-    #     print(row,col)
-    #     axarr[row,col].imshow(hot_window_img)
-    #     axarr[row,col].set_title('test' + str(itest + 1), fontsize=20)
-    #
-    # plt.savefig('output_images/test_hot_windows.png')
+    f, axarr = plt.subplots(2,3, figsize=(24, 9))
+    for itest in range(6):
+        img = mpimg.imread('test_images/test' + str(itest + 1) + '.jpg')
+        img = img.astype(np.float32) / 255
+        print(img.shape)
+        print(np.max(img))
 
+        t = time.time()
+        hot_windows0, hot_window_img = car_detect(img, [clf, X_scaler, config])
+        print(round(time.time() - t, 2), 'Seconds to detect car ...')
+        row = int(itest/3)
+        col = np.mod(itest,3)
+        print(row,col)
+        axarr[row,col].imshow(hot_window_img)
+        axarr[row,col].set_title('test' + str(itest + 1), fontsize=20)
+
+    plt.savefig('output_images/test_hot_windows.png')
+    plt.clf()
 
 
     img = mpimg.imread('test_images/test6.jpg')

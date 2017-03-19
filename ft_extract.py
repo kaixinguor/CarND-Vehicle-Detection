@@ -404,11 +404,11 @@ if __name__ == '__main__':
 
 
     # # # explore color space
-    # explore_color(vis1, vis2, example_vehicle, example_nonvehicle, num_ex)
+    explore_color(vis1, vis2, example_vehicle, example_nonvehicle, num_ex)
     #
     #
     # # # explore HOG features in different color space
-    # explore_hog(vis1,vis2)
+    explore_hog(vis1,vis2)
 
     # # HOG with chosen parameters
     orient = 9
